@@ -1,0 +1,10 @@
+{
+  "noise_pct": 5,
+  "training_seconds": 22.60512270000072,
+  "epochs": 66,
+  "best_validation_loss": 0.10284158419788514,
+  "seed": 0,
+  "split_seed": 42,
+  "noise_seed": 12350,
+  "median_erms_pct": 9.17943399523526
+}

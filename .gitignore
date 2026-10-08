@@ -1,0 +1,34 @@
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# IDE e sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Segredos e configurações locais
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários
+*.log
+*.tmp
+.ipynb_checkpoints/
