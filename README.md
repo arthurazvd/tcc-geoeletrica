@@ -1,220 +1,47 @@
-# Inversão Geoelétrica 1D Baseada em Redes Neurais
+# TCC — Inversão Geoelétrica 1D com Redes Neurais
 
-Projeto de pesquisa/TCC que investiga o uso de **redes neurais artificiais do tipo MLP (Multi-Layer Perceptron)** para estimar parâmetros de modelos geoelétricos unidimensionais a partir de curvas sintéticas de **Sondagem Elétrica Vertical (SEV)**, utilizando o arranjo Schlumberger.
+**Versão principal:** V8, sem TRF e sem Levenberg–Marquardt na previsão. Apenas três arquivos de pesos são usados: `neural_v5.pt` (MLP de base), `neural_v7_residual.pt` (correção neural) e `neural_v8_physics_correction.pt` (correção neural guiada pelo resíduo físico). V5 e V7 são **componentes internos** da V8, não métodos concorrentes apresentados no artigo.
 
-## Objetivo
-
-A inversão geoelétrica busca recuperar propriedades do subsolo a partir de medidas de resistividade aparente. Neste projeto, uma rede neural aprende a relação entre uma curva de SEV e cinco parâmetros de um modelo de três camadas:
-
-| Parâmetro | Significado | Unidade |
-| --- | --- | --- |
-| `rho1`, `rho2`, `rho3` | Resistividades elétricas das três camadas | Ω·m |
-| `h1`, `h2` | Espessuras das duas primeiras camadas | m |
-
-A terceira camada é considerada um semiespaço. A entrada da rede contém **20 valores de resistividade aparente**, correspondentes a espaçamentos `AB/2` entre 1 e 200 m.
-
-## O que o projeto faz
-
-1. **Modelagem direta:** calcula curvas de resistividade aparente para modelos de três camadas com integração numérica e função de Bessel `J1`.
-2. **Geração de dados:** cria conjuntos sintéticos de modelos geoelétricos e suas curvas, exportados em CSV.
-3. **Treinamento:** treina uma MLP para estimar os cinco parâmetros a partir dos 20 valores da curva.
-4. **Predição:** compara parâmetros conhecidos de um modelo sintético com as estimativas da rede.
-5. **Experimentos com ruído:** treina e compara modelos independentes para níveis de ruído de 0%, 2% e 5%.
-6. **Avaliação:** gera métricas, tabelas e gráficos para análise dos resultados.
-
-> **Escopo:** o projeto trabalha com dados sintéticos. A validação com dados reais de campo não está demonstrada nesta versão.
-
-## Tecnologias
-
-- Python 3
-- NumPy e SciPy: operações numéricas e modelagem direta
-- Pandas: leitura e manipulação de conjuntos de dados
-- scikit-learn: treinamento e avaliação da MLP
-- Matplotlib: gráficos
-- Joblib: armazenamento dos modelos treinados
-
-## Estrutura do repositório
-
-```text
-tcc-geoeletrica/
-├── data/                     # Bases sintéticas em CSV
-├── models/                   # Modelos treinados (.joblib)
-│   └── noise/                # Modelos por nível de ruído
-├── results/
-│   ├── figures/              # Gráficos produzidos
-│   ├── metrics/              # Métricas do treinamento principal
-│   └── noise/                # Métricas e previsões com ruído
-├── src/
-│   ├── forward_model.py      # Modelagem direta da SEV
-│   ├── models.py             # Representação dos modelos geoelétricos
-│   ├── generate_dataset.py   # Geração do dataset
-│   ├── ml_pipeline.py        # Pipeline de aprendizado de máquina
-│   ├── train_mlp.py          # Treinamento principal
-│   ├── predict.py            # Predição com a MLP principal
-│   ├── noise_experiments.py  # Experimentos com ruído
-│   ├── predict_noise.py      # Predição usando as três redes
-│   └── demo.py               # Demonstração da modelagem direta
-├── tests/
-│   └── test_forward.py       # Teste do modelo direto
-├── .gitignore
-├── requirements.txt
-└── README.md
-```
-
-## Instalação
-
-É recomendável utilizar Python 3.11 ou superior e executar os comandos **na raiz do projeto**.
-
-### 1. Criar e ativar o ambiente virtual
-
-**Windows (PowerShell):**
-
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-Se a ativação estiver bloqueada no PowerShell:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1
-```
-
-**Linux / macOS:**
+## Instalar e executar
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 2. Instalar as dependências
-
-```bash
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+python -m src.predict --rho1 100 --rho2 30 --rho3 250 --h1 5 --h2 12 --outdir results/minha_previsao
+python -m src.predict --rho1 100 --rho2 30 --rho3 250 --h1 5 --h2 12 --noise-pct 2 --outdir results/minha_previsao_ruidosa
+python -m src.predict --csv results/exemplos/entrada_sem_ruido.csv --outdir results/meu_csv
+python -m src.examples
+python -m src.evaluate
+python -m pytest -q
+# Opcional: novo treinamento da correção V8 usando checkpoints V5/V7 congelados
+python -m src.train_v8 --epochs 10 --n-scenario 2500 --skip-eval
 ```
 
-O `.gitignore` impede que a pasta `.venv/` seja incluída em novos commits. Cada pessoa pode criar seu próprio ambiente virtual.
+Cada previsão cria `curva_v8.png`, `curvas.csv` e `metricas.json`. O script de exemplos já produziu gráficos para **quatro cenários, cada um sem ruído e com 2% de ruído**, disponíveis em `results/exemplos`.
 
-## Como executar
+## CSV
 
-### Etapa 1: modelagem direta e geração de dados
+As colunas devem chamar-se **`AB2_m,rho_apparent_ohmm`**, conter **exatamente 20 linhas** com espaçamentos `np.geomspace(1,200,20)` em metros, ordenadas, e valores positivos em Ω·m. Isso é exigido pelos checkpoints treinados. Medições com outra configuração de eletrodos **não devem ser reinterpretadas como equivalentes**; exigem tratamento/validação específicos.
 
-Execute a demonstração de uma curva de SEV:
+## Física da simulação
 
-```bash
-python -m src.demo
-```
+- SEV, arranjo Schlumberger aproximado para MN/AB pequeno; três camadas horizontais; 20 aberturas `AB/2` entre 1 e 200 m, ou `AB` total entre 2 e 400 m.
+- `field_protocol.py` inclui as convenções SI, espaçamentos MN nominais e o fator geométrico, mas o operador direto é a aproximação Schlumberger baseada em AB/2; **não simula explicitamente o potencial para MN finito**.
+- `realistic_data.py` define cenários hipotéticos (não são medições de campo). Ruído lognormal multiplicativo de 2% é uma perturbação sintética, não um retrato completo do erro instrumental.
+- A abertura de 400 m não define a profundidade efetiva; h1 e h2 são espessuras e a terceira camada é semiespaço. ASTM D6431-25 fornece diretrizes gerais sobre eletrorresistividade DC, não exige 20 pontos ou 400 m.
 
-O gráfico é salvo em `results/figures/demo_sev.png`.
+## Treinamento e reprodutibilidade
 
-Para gerar uma base pequena de teste:
+Os checkpoints V5/V7/V8 são fornecidos **já treinados**. Este pacote reúne apenas os componentes usados para executar e avaliar a V8; os scripts/artefatos de V1–V7 e treinamento integral desde o primeiro modelo foram excluídos da distribuição limpa. Para reproduzir o **treinamento completo** desde o início, é necessário o arquivo histórico do projeto. O ajuste da correção V8 pode ser reexecutado a partir desses checkpoints com `python -m src.train_v8`, salvando por padrão um modelo candidato sem sobrescrever o modelo validado. A avaliação reservada da V8 pode ser repetida sem retreinamento usando `python -m src.evaluate`.
 
-```bash
-python -m src.generate_dataset --n 100 --output data/exemplo_100.csv
-```
+## Resultados já verificados (holdout final)
 
-Para gerar a base de 30.000 modelos:
+`results/metricas/neural_v8_locked_holdout.json`: 400 modelos novos por cenário (seed 99103), sem ruído e com 2% de ruído; no último caso, o desajuste compara o modelo reconstruído com a **curva limpa**, não com a entrada perturbada. Para a V8 com duas passagens: medianas sem ruído 1,478%, 1,310%, 1,314%, 1,329%; com 2% ruído 1,809%, 1,730%, 1,769%, 1,761% (original, úmido, seco/rochoso, condutivo). Meta inferior a 1% **não foi atingida na mediana**. O caso ilustrativo [100,30,250,5,12] obteve ~0,606% sem ruído, não é representativo da média.
 
-```bash
-python -m src.generate_dataset --n 30000 --du 0.0005 --output data/dataset_30000.csv
-```
+## Organização
 
-O parâmetro `--du` controla o passo da integração numérica. O valor `0.0005` exige mais processamento que o padrão `0.002`.
-
-**Formato do CSV:** 20 colunas `rhoa_01` a `rhoa_20` (entradas) e cinco colunas `rho1`, `rho2`, `rho3`, `h1`, `h2` (alvos). As resistividades dos modelos sintéticos são amostradas entre 10 e 1000 Ω·m; `h1` entre 1 e 20 m; `h2` entre 2 e 50 m.
-
-### Etapa 2: treinamento e predição da MLP
-
-O ZIP já contém `data/dataset_30000.csv`, então não é necessário regenerá-lo para começar a treinar.
-
-```bash
-python -m src.train_mlp --dataset data/dataset_30000.csv
-```
-
-Esse comando salva `models/mlp_bundle.joblib` e arquivos de avaliação em `results/metrics/`.
-
-Para testar a inversão com um exemplo sintético:
-
-```bash
-python -m src.predict
-```
-
-Para informar parâmetros específicos:
-
-```bash
-python -m src.predict --rho1 80 --rho2 300 --rho3 40 --h1 8 --h2 25
-```
-
-O programa compara os parâmetros reais com os estimados e salva `results/figures/prediction_demo.png`.
-
-### Etapa 3: robustez a ruído
-
-Treine e compare as redes para níveis de ruído de **0%, 2% e 5%**:
-
-```bash
-python -m src.noise_experiments --dataset data/dataset_30000.csv
-```
-
-Para também avaliar o erro das curvas previstas (processamento adicional):
-
-```bash
-python -m src.noise_experiments --dataset data/dataset_30000.csv --curve-metrics --du 0.0005
-```
-
-Os modelos ficam em `models/noise/`; as métricas em `results/noise/`; o gráfico comparativo em `results/figures/noise_parameter_errors.png`.
-
-Compare as previsões dos três modelos em um mesmo terreno:
-
-```bash
-python -m src.predict_noise --rho1 80 --rho2 300 --rho3 40 --h1 8 --h2 25
-```
-
-Os valores estimados e os erros dependem do treinamento, das sementes e das versões das bibliotecas. Não são resultados fixos.
-
-## Testes
-
-Há um teste básico do modelo direto para o caso de meio homogêneo. Instale o pytest e execute a partir da raiz:
-
-```bash
-python -m pip install pytest
-python -m pytest tests/
-```
-
-Esse teste não substitui uma validação numérica mais extensa nem uma comparação com medições de campo.
-
-## Arquivos já incluídos
-
-O repositório entregue contém bases CSV, modelos `.joblib` previamente treinados e resultados/gráficos de execuções anteriores. É possível experimentar predições com esses modelos sem refazer todo o treinamento, desde que as dependências estejam instaladas e os arquivos permaneçam nos caminhos esperados.
-
-## Git e boas práticas
-
-O ambiente virtual, caches Python, arquivos locais de IDE e `.env` são ignorados. Para iniciar o versionamento:
-
-```bash
-git init
-git add .
-git commit -m "docs: organiza projeto e documentacao"
-```
-
-Se `.venv/` já tiver sido adicionada ao Git anteriormente, o `.gitignore` **não a remove automaticamente** do índice. Nesse caso:
-
-```bash
-git rm -r --cached .venv
-git add .gitignore
-git commit -m "chore: remove ambiente virtual do versionamento"
-```
-
-> **Observação:** os datasets, modelos treinados e resultados foram preservados e não são ignorados por padrão. Antes de publicar, confira o tamanho desses arquivos e considere Git LFS para arquivos grandes.
-
-## Limitações e próximos passos
-
-- Ampliar a validação do operador direto, inclusive com estudos de convergência numérica.
-- Avaliar o desempenho em diferentes configurações geoelétricas e níveis de ruído.
-- Investigar generalização para dados de campo e limitações de não unicidade da inversão.
-- Registrar versões e sementes para aumentar a reprodutibilidade experimental.
-
-## Licença
-
-Consulte o arquivo [`LICENSE`](LICENSE) incluído no repositório.
+- `src/`: operador direto, modelos neurais, simulação, predição, exemplos e avaliação.
+- `models/`: três checkpoints estritamente necessários.
+- `results/exemplos/`: curvas e métricas de casos reprodutíveis.
+- `results/metricas/`: avaliação reservada e histórico do treinamento da V8.
+- `artigo/`: materiais LaTeX finais (também entregues em ZIP independente).
+- `tests/`: verificações automatizadas.

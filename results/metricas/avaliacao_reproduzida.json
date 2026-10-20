@@ -1,0 +1,130 @@
+{
+  "seed": 99103,
+  "n_per_scenario": 400,
+  "total_distinct_models": 1600,
+  "reference": "clean theoretical forward curves for both noise regimes",
+  "method": "V8 neural physical-residual correction (2 passes), no TRF or LM",
+  "noise_std_pct": 2,
+  "results": {
+    "original": {
+      "clean": {
+        "median_pct": 1.4781806517521128,
+        "mean_pct": 1.9911037772316231,
+        "p90_pct": 3.3899606351446385,
+        "below_1pct_fraction": 0.24,
+        "below_2pct_fraction": 0.6975,
+        "parameter_median_relative_pct": {
+          "rho1": 0.7402667810873231,
+          "rho2": 14.159700419986155,
+          "rho3": 5.4752015944955055,
+          "h1": 6.591284929286115,
+          "h2": 23.89681536927018
+        }
+      },
+      "noise_2pct": {
+        "median_pct": 1.8087553807685286,
+        "mean_pct": 2.347166781240428,
+        "p90_pct": 3.869206058773801,
+        "below_1pct_fraction": 0.1175,
+        "below_2pct_fraction": 0.565,
+        "parameter_median_relative_pct": {
+          "rho1": 1.0032689138538717,
+          "rho2": 14.84466684160159,
+          "rho3": 6.130874438606179,
+          "h1": 8.663438019516963,
+          "h2": 26.080161710818338
+        }
+      }
+    },
+    "solo_umido": {
+      "clean": {
+        "median_pct": 1.3096611699170657,
+        "mean_pct": 1.5117114172922594,
+        "p90_pct": 2.6462325847830552,
+        "below_1pct_fraction": 0.2875,
+        "below_2pct_fraction": 0.765,
+        "parameter_median_relative_pct": {
+          "rho1": 0.5376415239750556,
+          "rho2": 10.534829449060375,
+          "rho3": 5.410122660865504,
+          "h1": 8.889943900375687,
+          "h2": 13.963351646582689
+        }
+      },
+      "noise_2pct": {
+        "median_pct": 1.7302488234768645,
+        "mean_pct": 1.92574442974088,
+        "p90_pct": 3.1764096005353055,
+        "below_1pct_fraction": 0.12,
+        "below_2pct_fraction": 0.625,
+        "parameter_median_relative_pct": {
+          "rho1": 0.8120763386639198,
+          "rho2": 11.313264929745655,
+          "rho3": 8.087862228476169,
+          "h1": 8.854535452155407,
+          "h2": 15.50241481741393
+        }
+      }
+    },
+    "solo_seco_rochoso": {
+      "clean": {
+        "median_pct": 1.3136502501697405,
+        "mean_pct": 1.57992790580394,
+        "p90_pct": 2.7994469463153684,
+        "below_1pct_fraction": 0.285,
+        "below_2pct_fraction": 0.775,
+        "parameter_median_relative_pct": {
+          "rho1": 0.5492343896413523,
+          "rho2": 12.172552226841809,
+          "rho3": 4.302895256246151,
+          "h1": 7.763107123285002,
+          "h2": 19.84302090601365
+        }
+      },
+      "noise_2pct": {
+        "median_pct": 1.7689796311102755,
+        "mean_pct": 1.9712364422044744,
+        "p90_pct": 3.0298544192615284,
+        "below_1pct_fraction": 0.1275,
+        "below_2pct_fraction": 0.595,
+        "parameter_median_relative_pct": {
+          "rho1": 0.9740190221885987,
+          "rho2": 11.318307774094572,
+          "rho3": 6.718256408618123,
+          "h1": 8.974300206446348,
+          "h2": 21.544060638164844
+        }
+      }
+    },
+    "camada_condutiva": {
+      "clean": {
+        "median_pct": 1.3287896796331702,
+        "mean_pct": 1.512104925328966,
+        "p90_pct": 2.488967716952599,
+        "below_1pct_fraction": 0.3025,
+        "below_2pct_fraction": 0.8025,
+        "parameter_median_relative_pct": {
+          "rho1": 0.5161485606782287,
+          "rho2": 15.6457118462606,
+          "rho3": 11.940046910205847,
+          "h1": 2.3286571513167043,
+          "h2": 17.41894006941247
+        }
+      },
+      "noise_2pct": {
+        "median_pct": 1.7612628383099311,
+        "mean_pct": 1.920907824180087,
+        "p90_pct": 2.997321512391715,
+        "below_1pct_fraction": 0.1075,
+        "below_2pct_fraction": 0.605,
+        "parameter_median_relative_pct": {
+          "rho1": 0.8590151189202251,
+          "rho2": 15.454081137294185,
+          "rho3": 15.074205488461473,
+          "h1": 2.7653340484848483,
+          "h2": 19.016802988710012
+        }
+      }
+    }
+  }
+}

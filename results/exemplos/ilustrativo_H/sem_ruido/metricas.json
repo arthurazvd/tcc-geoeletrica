@@ -1,0 +1,21 @@
+{
+  "metodo": "V8: base neural + V7 residual + V8 residual físico, 2 passagens por padrão",
+  "sem_TRF_ou_LM": true,
+  "numero_passagens_neurais": 2,
+  "ERMS_vs_observed_pct": 0.6060698803708169,
+  "estimativa": {
+    "rho1_ohmm": 100.1893539428711,
+    "rho2_ohmm": 31.947725296020508,
+    "rho3_ohmm": 249.8343505859375,
+    "h1_m": 4.758790969848633,
+    "h2_m": 12.844877243041992
+  },
+  "ERMS_vs_clean_reference_pct": 0.6060698803708169,
+  "parameter_relative_errors_pct": {
+    "rho1": 0.18935394287109375,
+    "rho2": 6.492417653401692,
+    "rho3": 0.066259765625,
+    "h1": 4.824180603027344,
+    "h2": 7.040643692016602
+  }
+}
